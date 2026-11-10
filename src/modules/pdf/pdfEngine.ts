@@ -8,6 +8,7 @@ export interface PdfAnnotation {
   y: number;
   size?: number;
   color?: { r: number; g: number; b: number };
+  whiteout?: boolean;
 }
 
 export interface PdfPageInfo {
@@ -93,7 +94,7 @@ export async function inspectPdf(buffer: ArrayBuffer): Promise<{
 }
 
 /**
- * Adds text annotations and renders a modified PDF buffer
+ * Adds text annotations and whiteout patches to a PDF buffer
  */
 export async function applyAnnotations(
   buffer: ArrayBuffer,
@@ -103,14 +104,29 @@ export async function applyAnnotations(
   const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
 
   for (const annot of annotations) {
+    if (!annot.text.trim()) continue;
+
     if (annot.pageIndex >= 0 && annot.pageIndex < pdfDoc.getPageCount()) {
       const page = pdfDoc.getPage(annot.pageIndex);
       const c = annot.color || { r: 0.1, g: 0.1, b: 0.1 };
+      const fontSize = annot.size || 12;
+
+      // Draw whiteout mask rectangle if enabled
+      if (annot.whiteout) {
+        const textWidth = annot.text.length * fontSize * 0.58;
+        page.drawRectangle({
+          x: annot.x - 4,
+          y: annot.y - 3,
+          width: textWidth + 8,
+          height: fontSize + 6,
+          color: rgb(1, 1, 1),
+        });
+      }
 
       page.drawText(annot.text, {
         x: annot.x,
         y: annot.y,
-        size: annot.size || 12,
+        size: fontSize,
         font,
         color: rgb(c.r, c.g, c.b),
       });

@@ -87,6 +87,24 @@ export function App() {
     }
   };
 
+  const handleOpenPdfInWriter = (htmlContent: string, title: string) => {
+    const newTab: OfficeTab = {
+      id: Math.random().toString(36).substring(7),
+      title: `${title} (Editable)`,
+      module: 'writer',
+      file: {
+        name: `${title}.html`,
+        size: htmlContent.length,
+        type: 'text/html',
+        lastModified: Date.now(),
+        data: new TextEncoder().encode(htmlContent).buffer as ArrayBuffer,
+      },
+    };
+    setTabs((prev) => [...prev, newTab]);
+    setActiveTabId(newTab.id);
+    setStatusMessage(`Extracted ${title} into LocalWriter for editing.`);
+  };
+
   // Commands for the Ctrl+K palette
   const commands: CommandItem[] = [
     {
@@ -238,7 +256,11 @@ export function App() {
         ) : activeTab.module === 'sheets' ? (
           <LocalSheets initialFile={activeTab.file} onSaveStatus={setStatusMessage} />
         ) : (
-          <LocalPdfStudio initialFile={activeTab.file} onSaveStatus={setStatusMessage} />
+          <LocalPdfStudio
+            initialFile={activeTab.file}
+            onSaveStatus={setStatusMessage}
+            onOpenInWriter={handleOpenPdfInWriter}
+          />
         )}
       </main>
 
