@@ -34,9 +34,10 @@ Build **LocalOffice**: a standalone, modern, minimalist, browser-friendly, local
     - `User Journey`: Switch to Sheets tab, enter numbers in A1:A4, enter `=SUM(A1:A4)` in A5, verify calculation, export `.xlsx`.
     - `Observable Done-When`: Formula recalculates reactively; grid smoothly scrolls 5,000 cells at 60fps.
 
-- [ ] **Task 4: LocalPDF Studio (Viewer, Reflow, Annotation & Export)** `[GATE: VISUAL_CRITIC]`
+- [x] **Task 4: LocalPDF Studio (Viewer, Reflow, Annotation & Export)** `[GATE: VISUAL_CRITIC]`
   - **Verify**: `npx vitest run src/modules/pdf/__tests__`
   - **Description**: Implement PDF viewer via `pdfjs-dist` and document manipulator via `pdf-lib`. Enable page reordering, text insertion, highlights, ink signatures, and flattened export.
+  - **Status**: Completed. Verified PDF creation, page inspection, interactive annotations, and clean export.
   - **`[E2E_CONTRACT] (Non-Headless)`**:
     - `Launch`: `npm run dev`
     - `User Journey`: Open sample PDF, add text annotation and highlight, reorder pages, click "Save PDF", verify output matches.
