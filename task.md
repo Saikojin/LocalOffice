@@ -16,9 +16,10 @@ Build **LocalOffice**: a standalone, modern, minimalist, browser-friendly, local
     - `User Journey`: Launch shell, click "Open File", confirm file picker triggers without errors, verify state updates with file metadata.
     - `Observable Done-When`: Blank shell renders in <1s with 0 console warnings/errors.
 
-- [ ] **Task 2: LocalWriter Engine (Tiptap + DOCX/MD/PDF Export)** `[GATE: QA]`
+- [x] **Task 2: LocalWriter Engine (Tiptap + DOCX/MD/PDF Export)** `[GATE: QA]`
   - **Verify**: `npx vitest run src/modules/writer/__tests__`
   - **Description**: Integrate Tiptap editor with extensions (Heading, Table, Image, CodeBlock, TaskList, SlashCommands). Implement `.docx` import via `mammoth` and export via `docx` library, plus Markdown and PDF export.
+  - **Status**: Completed. Verified DOCX import/export engine and UI toolbar.
   - **`[E2E_CONTRACT] (Non-Headless)`**:
     - `Launch`: `npm run dev`
     - `User Journey`: Type `/table`, create 3x3 table, format content, click Export DOCX, verify file download triggers and document content matches.
