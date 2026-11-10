@@ -7,9 +7,13 @@
     "dev": "vite",
     "build": "tsc && vite build",
     "preview": "vite preview",
-    "test": "vitest run"
+    "test": "vitest run",
+    "tauri": "tauri",
+    "build:desktop": "npm run build && tauri build",
+    "build:android": "npm run build && tauri android build --apk"
   },
   "dependencies": {
+    "@tauri-apps/api": "^2.12.4",
     "@tiptap/extension-placeholder": "^3.33.1",
     "@tiptap/extension-table": "^3.33.1",
     "@tiptap/extension-table-cell": "^3.33.1",
@@ -31,6 +35,7 @@
     "xlsx": "^0.18.5"
   },
   "devDependencies": {
+    "@tauri-apps/cli": "^2.12.4",
     "@testing-library/jest-dom": "^6.6.3",
     "@testing-library/react": "^16.2.0",
     "@types/node": "^22.13.4",
