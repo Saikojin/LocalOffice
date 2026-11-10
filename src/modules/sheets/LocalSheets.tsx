@@ -145,6 +145,7 @@ export const LocalSheets: React.FC<LocalSheetsProps> = ({ initialFile, onSaveSta
       <div className="h-10 border-b border-stone-200 dark:border-stone-800 px-4 flex items-center justify-between bg-stone-50/50 dark:bg-stone-900/50 text-xs">
         <div className="flex items-center space-x-3">
           <input
+            data-testid="sheets-title-input"
             type="text"
             value={docTitle}
             onChange={(e) => setDocTitle(e.target.value)}
@@ -156,6 +157,7 @@ export const LocalSheets: React.FC<LocalSheetsProps> = ({ initialFile, onSaveSta
 
           {/* Quick Functions */}
           <button
+            data-testid="btn-autosum"
             onClick={() => {
               updateCellValue(selectedCell, `=SUM(A1:${selectedCell})`);
             }}
@@ -170,6 +172,7 @@ export const LocalSheets: React.FC<LocalSheetsProps> = ({ initialFile, onSaveSta
         {/* Export Buttons */}
         <div className="flex items-center space-x-2">
           <button
+            data-testid="btn-save-xlsx"
             onClick={handleSaveXlsx}
             className="flex items-center space-x-1 px-2.5 py-1 rounded bg-emerald-600 hover:bg-emerald-500 text-white font-medium transition-colors"
             title="Save as Excel Workbook (.xlsx)"
@@ -179,6 +182,7 @@ export const LocalSheets: React.FC<LocalSheetsProps> = ({ initialFile, onSaveSta
           </button>
 
           <button
+            data-testid="btn-export-csv"
             onClick={handleExportCsv}
             className="px-2 py-1 rounded bg-stone-100 hover:bg-stone-200 dark:bg-stone-800 dark:hover:bg-stone-700 text-stone-700 dark:text-stone-300 transition-colors"
             title="Export Active Sheet as CSV"
@@ -191,7 +195,7 @@ export const LocalSheets: React.FC<LocalSheetsProps> = ({ initialFile, onSaveSta
       {/* Formula Bar */}
       <div className="h-8 border-b border-stone-200 dark:border-stone-800 px-3 flex items-center space-x-2 bg-white dark:bg-stone-900 text-xs">
         {/* Active Cell Reference badge */}
-        <div className="w-14 font-mono font-medium text-center py-0.5 rounded bg-stone-100 dark:bg-stone-800 text-stone-700 dark:text-stone-300 border border-stone-200 dark:border-stone-700">
+        <div data-testid="sheets-active-cell" className="w-14 font-mono font-medium text-center py-0.5 rounded bg-stone-100 dark:bg-stone-800 text-stone-700 dark:text-stone-300 border border-stone-200 dark:border-stone-700">
           {selectedCell}
         </div>
 
@@ -200,6 +204,7 @@ export const LocalSheets: React.FC<LocalSheetsProps> = ({ initialFile, onSaveSta
         {/* Formula Input */}
         <input
           ref={formulaInputRef}
+          data-testid="sheets-formula-input"
           type="text"
           value={editingCell === selectedCell ? editValue : currentSheetData[selectedCell] !== undefined ? String(currentSheetData[selectedCell]) : ''}
           onChange={(e) => {
@@ -217,7 +222,7 @@ export const LocalSheets: React.FC<LocalSheetsProps> = ({ initialFile, onSaveSta
       </div>
 
       {/* Spreadsheet Grid Viewport */}
-      <div className="flex-1 overflow-auto relative">
+      <div data-testid="sheets-grid-viewport" className="flex-1 overflow-auto relative">
         <table className="border-collapse table-fixed text-xs font-mono">
           <thead>
             <tr className="bg-stone-100 dark:bg-stone-800/90 sticky top-0 z-20">
@@ -256,6 +261,7 @@ export const LocalSheets: React.FC<LocalSheetsProps> = ({ initialFile, onSaveSta
                     return (
                       <td
                         key={cellKey}
+                        data-testid={`cell-${cellKey}`}
                         onClick={() => handleCellClick(cellKey)}
                         onDoubleClick={() => handleCellDoubleClick(cellKey)}
                         className={`w-24 h-6 px-1.5 border-b border-r border-stone-200 dark:border-stone-800 truncate text-left relative cursor-cell ${
@@ -264,6 +270,7 @@ export const LocalSheets: React.FC<LocalSheetsProps> = ({ initialFile, onSaveSta
                       >
                         {isEditing ? (
                           <input
+                            data-testid="cell-edit-input"
                             type="text"
                             autoFocus
                             value={editValue}
@@ -292,10 +299,11 @@ export const LocalSheets: React.FC<LocalSheetsProps> = ({ initialFile, onSaveSta
 
       {/* Sheet Tabs Bar (Bottom) */}
       <footer className="h-8 border-t border-stone-200 dark:border-stone-800 px-2 flex items-center space-x-1 bg-stone-100 dark:bg-stone-900 text-xs select-none">
-        <div className="flex items-center space-x-1 overflow-x-auto">
+        <div data-testid="sheet-tabs-container" className="flex items-center space-x-1 overflow-x-auto">
           {sheetNames.map((name) => (
             <button
               key={name}
+              data-testid={`sheet-tab-${name}`}
               onClick={() => setActiveSheet(name)}
               className={`px-3 py-1 rounded-t border-t border-x transition-colors ${
                 activeSheet === name
@@ -309,6 +317,7 @@ export const LocalSheets: React.FC<LocalSheetsProps> = ({ initialFile, onSaveSta
         </div>
 
         <button
+          data-testid="btn-add-sheet"
           onClick={addSheet}
           className="p-1 rounded hover:bg-stone-200 dark:hover:bg-stone-800 text-stone-500 hover:text-stone-800 dark:hover:text-stone-200 transition-colors"
           title="Add New Sheet"

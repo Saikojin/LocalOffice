@@ -151,6 +151,7 @@ export const LocalWriter: React.FC<LocalWriterProps> = ({ initialFile, onSaveSta
         {/* Document Title input */}
         <div className="flex items-center space-x-2">
           <input
+            data-testid="writer-title-input"
             type="text"
             value={docTitle}
             onChange={(e) => setDocTitle(e.target.value)}
@@ -162,6 +163,7 @@ export const LocalWriter: React.FC<LocalWriterProps> = ({ initialFile, onSaveSta
         {/* Toolbar Controls */}
         <div className="flex items-center space-x-0.5 bg-stone-100 dark:bg-stone-800/80 p-0.5 rounded-lg text-xs">
           <button
+            data-testid="btn-bold"
             onClick={() => editor.chain().focus().toggleBold().run()}
             className={`p-1.5 rounded transition-colors ${editor.isActive('bold') ? 'bg-white dark:bg-stone-700 text-blue-600 dark:text-blue-400 shadow-xs' : 'text-stone-600 dark:text-stone-400 hover:text-stone-900'}`}
             title="Bold (Ctrl+B)"
@@ -170,6 +172,7 @@ export const LocalWriter: React.FC<LocalWriterProps> = ({ initialFile, onSaveSta
           </button>
 
           <button
+            data-testid="btn-italic"
             onClick={() => editor.chain().focus().toggleItalic().run()}
             className={`p-1.5 rounded transition-colors ${editor.isActive('italic') ? 'bg-white dark:bg-stone-700 text-blue-600 dark:text-blue-400 shadow-xs' : 'text-stone-600 dark:text-stone-400 hover:text-stone-900'}`}
             title="Italic (Ctrl+I)"
@@ -178,6 +181,7 @@ export const LocalWriter: React.FC<LocalWriterProps> = ({ initialFile, onSaveSta
           </button>
 
           <button
+            data-testid="btn-strike"
             onClick={() => editor.chain().focus().toggleStrike().run()}
             className={`p-1.5 rounded transition-colors ${editor.isActive('strike') ? 'bg-white dark:bg-stone-700 text-blue-600 dark:text-blue-400 shadow-xs' : 'text-stone-600 dark:text-stone-400 hover:text-stone-900'}`}
             title="Strikethrough"
@@ -186,6 +190,7 @@ export const LocalWriter: React.FC<LocalWriterProps> = ({ initialFile, onSaveSta
           </button>
 
           <button
+            data-testid="btn-code"
             onClick={() => editor.chain().focus().toggleCode().run()}
             className={`p-1.5 rounded transition-colors ${editor.isActive('code') ? 'bg-white dark:bg-stone-700 text-blue-600 dark:text-blue-400 shadow-xs' : 'text-stone-600 dark:text-stone-400 hover:text-stone-900'}`}
             title="Inline Code"
@@ -196,6 +201,7 @@ export const LocalWriter: React.FC<LocalWriterProps> = ({ initialFile, onSaveSta
           <div className="h-4 w-px bg-stone-300 dark:bg-stone-700 mx-1" />
 
           <button
+            data-testid="btn-h1"
             onClick={() => editor.chain().focus().toggleHeading({ level: 1 }).run()}
             className={`p-1.5 rounded transition-colors ${editor.isActive('heading', { level: 1 }) ? 'bg-white dark:bg-stone-700 text-blue-600 dark:text-blue-400 shadow-xs' : 'text-stone-600 dark:text-stone-400 hover:text-stone-900'}`}
             title="Heading 1"
@@ -204,6 +210,7 @@ export const LocalWriter: React.FC<LocalWriterProps> = ({ initialFile, onSaveSta
           </button>
 
           <button
+            data-testid="btn-h2"
             onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()}
             className={`p-1.5 rounded transition-colors ${editor.isActive('heading', { level: 2 }) ? 'bg-white dark:bg-stone-700 text-blue-600 dark:text-blue-400 shadow-xs' : 'text-stone-600 dark:text-stone-400 hover:text-stone-900'}`}
             title="Heading 2"
@@ -212,6 +219,7 @@ export const LocalWriter: React.FC<LocalWriterProps> = ({ initialFile, onSaveSta
           </button>
 
           <button
+            data-testid="btn-h3"
             onClick={() => editor.chain().focus().toggleHeading({ level: 3 }).run()}
             className={`p-1.5 rounded transition-colors ${editor.isActive('heading', { level: 3 }) ? 'bg-white dark:bg-stone-700 text-blue-600 dark:text-blue-400 shadow-xs' : 'text-stone-600 dark:text-stone-400 hover:text-stone-900'}`}
             title="Heading 3"
@@ -222,6 +230,7 @@ export const LocalWriter: React.FC<LocalWriterProps> = ({ initialFile, onSaveSta
           <div className="h-4 w-px bg-stone-300 dark:bg-stone-700 mx-1" />
 
           <button
+            data-testid="btn-bullet-list"
             onClick={() => editor.chain().focus().toggleBulletList().run()}
             className={`p-1.5 rounded transition-colors ${editor.isActive('bulletList') ? 'bg-white dark:bg-stone-700 text-blue-600 dark:text-blue-400 shadow-xs' : 'text-stone-600 dark:text-stone-400 hover:text-stone-900'}`}
             title="Bullet List"
@@ -230,6 +239,7 @@ export const LocalWriter: React.FC<LocalWriterProps> = ({ initialFile, onSaveSta
           </button>
 
           <button
+            data-testid="btn-ordered-list"
             onClick={() => editor.chain().focus().toggleOrderedList().run()}
             className={`p-1.5 rounded transition-colors ${editor.isActive('orderedList') ? 'bg-white dark:bg-stone-700 text-blue-600 dark:text-blue-400 shadow-xs' : 'text-stone-600 dark:text-stone-400 hover:text-stone-900'}`}
             title="Numbered List"
@@ -238,6 +248,7 @@ export const LocalWriter: React.FC<LocalWriterProps> = ({ initialFile, onSaveSta
           </button>
 
           <button
+            data-testid="btn-task-list"
             onClick={() => editor.chain().focus().toggleTaskList().run()}
             className={`p-1.5 rounded transition-colors ${editor.isActive('taskList') ? 'bg-white dark:bg-stone-700 text-blue-600 dark:text-blue-400 shadow-xs' : 'text-stone-600 dark:text-stone-400 hover:text-stone-900'}`}
             title="Task Checklist"
@@ -246,6 +257,7 @@ export const LocalWriter: React.FC<LocalWriterProps> = ({ initialFile, onSaveSta
           </button>
 
           <button
+            data-testid="btn-blockquote"
             onClick={() => editor.chain().focus().toggleBlockquote().run()}
             className={`p-1.5 rounded transition-colors ${editor.isActive('blockquote') ? 'bg-white dark:bg-stone-700 text-blue-600 dark:text-blue-400 shadow-xs' : 'text-stone-600 dark:text-stone-400 hover:text-stone-900'}`}
             title="Blockquote"
@@ -254,6 +266,7 @@ export const LocalWriter: React.FC<LocalWriterProps> = ({ initialFile, onSaveSta
           </button>
 
           <button
+            data-testid="btn-insert-table"
             onClick={() => editor.chain().focus().insertTable({ rows: 3, cols: 3, withHeaderRow: true }).run()}
             className="p-1.5 rounded text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-200 transition-colors"
             title="Insert 3x3 Table"
@@ -262,6 +275,7 @@ export const LocalWriter: React.FC<LocalWriterProps> = ({ initialFile, onSaveSta
           </button>
 
           <button
+            data-testid="btn-horizontal-rule"
             onClick={() => editor.chain().focus().setHorizontalRule().run()}
             className="p-1.5 rounded text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-200 transition-colors"
             title="Horizontal Divider"
@@ -272,6 +286,7 @@ export const LocalWriter: React.FC<LocalWriterProps> = ({ initialFile, onSaveSta
           <div className="h-4 w-px bg-stone-300 dark:bg-stone-700 mx-1" />
 
           <button
+            data-testid="btn-undo"
             onClick={() => editor.chain().focus().undo().run()}
             disabled={!editor.can().undo()}
             className="p-1.5 rounded text-stone-600 dark:text-stone-400 disabled:opacity-40 hover:text-stone-900 dark:hover:text-stone-200 transition-colors"
@@ -281,6 +296,7 @@ export const LocalWriter: React.FC<LocalWriterProps> = ({ initialFile, onSaveSta
           </button>
 
           <button
+            data-testid="btn-redo"
             onClick={() => editor.chain().focus().redo().run()}
             disabled={!editor.can().redo()}
             className="p-1.5 rounded text-stone-600 dark:text-stone-400 disabled:opacity-40 hover:text-stone-900 dark:hover:text-stone-200 transition-colors"
@@ -293,6 +309,7 @@ export const LocalWriter: React.FC<LocalWriterProps> = ({ initialFile, onSaveSta
         {/* Export / Print Actions */}
         <div className="flex items-center space-x-1.5 text-xs">
           <button
+            data-testid="btn-save-docx"
             onClick={handleSaveDocx}
             disabled={isExporting}
             className="flex items-center space-x-1 px-2.5 py-1 rounded bg-blue-600 hover:bg-blue-500 text-white font-medium transition-colors"
@@ -303,6 +320,7 @@ export const LocalWriter: React.FC<LocalWriterProps> = ({ initialFile, onSaveSta
           </button>
 
           <button
+            data-testid="btn-export-md"
             onClick={handleExportMarkdown}
             className="px-2 py-1 rounded bg-stone-100 hover:bg-stone-200 dark:bg-stone-800 dark:hover:bg-stone-700 text-stone-700 dark:text-stone-300 transition-colors"
             title="Export as Markdown (.md)"
@@ -311,6 +329,7 @@ export const LocalWriter: React.FC<LocalWriterProps> = ({ initialFile, onSaveSta
           </button>
 
           <button
+            data-testid="btn-print"
             onClick={handlePrint}
             className="p-1.5 rounded bg-stone-100 hover:bg-stone-200 dark:bg-stone-800 dark:hover:bg-stone-700 text-stone-700 dark:text-stone-300 transition-colors"
             title="Print / Save to PDF"
@@ -322,7 +341,7 @@ export const LocalWriter: React.FC<LocalWriterProps> = ({ initialFile, onSaveSta
 
       {/* Editor Canvas (Scrollable Document Page) */}
       <div className="flex-1 overflow-y-auto px-4 py-8 flex justify-center">
-        <div className="w-full max-w-[850px] bg-white dark:bg-stone-900 min-h-[900px] shadow-sm rounded-xl border border-stone-200/80 dark:border-stone-800/80 px-12 py-16">
+        <div data-testid="writer-editor-container" className="w-full max-w-[850px] bg-white dark:bg-stone-900 min-h-[900px] shadow-sm rounded-xl border border-stone-200/80 dark:border-stone-800/80 px-12 py-16">
           <EditorContent editor={editor} />
         </div>
       </div>
@@ -330,8 +349,8 @@ export const LocalWriter: React.FC<LocalWriterProps> = ({ initialFile, onSaveSta
       {/* Footer Word/Char Counter */}
       <footer className="h-6 bg-white dark:bg-stone-900 border-t border-stone-200 dark:border-stone-800 px-4 flex items-center justify-between text-[11px] text-stone-400 select-none">
         <div className="flex items-center space-x-3">
-          <span>{wordCount} words</span>
-          <span>{charCount} characters</span>
+          <span data-testid="writer-word-count">{wordCount} words</span>
+          <span data-testid="writer-char-count">{charCount} characters</span>
           <span>~{Math.ceil(wordCount / 200)} min read</span>
         </div>
         <div>

@@ -143,7 +143,7 @@ export function App() {
     {
       id: 'toggle-theme',
       title: isDark ? 'Switch to Light Mode' : 'Switch to Dark Mode',
-      subtitle: 'Toggle between dark and light minimalist aesthetic',
+      subtitle: 'Toggle between dark and light theme minimalist aesthetic',
       category: 'Settings',
       icon: isDark ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />,
       run: () => setIsDark(!isDark),
@@ -151,11 +151,11 @@ export function App() {
   ];
 
   return (
-    <div className={`min-h-screen flex flex-col ${isDark ? 'dark bg-stone-950 text-stone-100' : 'bg-stone-50 text-stone-900'}`}>
+    <div data-testid="app-root" className={`min-h-screen flex flex-col ${isDark ? 'dark bg-stone-950 text-stone-100' : 'bg-stone-50 text-stone-900'}`}>
       {/* Top Header Bar */}
       <header className="h-10 border-b border-stone-200 dark:border-stone-800 px-3 flex items-center justify-between select-none bg-white dark:bg-stone-900">
         <div className="flex items-center space-x-3">
-          <div className="flex items-center space-x-1.5 font-bold tracking-tight text-xs">
+          <div data-testid="brand-logo" className="flex items-center space-x-1.5 font-bold tracking-tight text-xs">
             <span className="w-2.5 h-2.5 rounded-full bg-blue-500 inline-block"></span>
             <span>LocalOffice</span>
           </div>
@@ -163,12 +163,14 @@ export function App() {
           <div className="h-4 w-px bg-stone-200 dark:bg-stone-800" />
 
           {/* Document Tabs */}
-          <div className="flex items-center space-x-1 overflow-x-auto max-w-xl">
+          <div data-testid="tabs-container" className="flex items-center space-x-1 overflow-x-auto max-w-xl">
             {tabs.map((tab) => {
               const isActive = tab.id === activeTab.id;
               return (
                 <div
                   key={tab.id}
+                  data-testid={`tab-${tab.id}`}
+                  data-active={isActive}
                   onClick={() => setActiveTabId(tab.id)}
                   className={`group flex items-center space-x-1.5 px-2.5 py-1 rounded text-xs cursor-pointer border transition-colors ${
                     isActive
@@ -182,6 +184,7 @@ export function App() {
                   <span className="truncate max-w-[120px]">{tab.title}</span>
                   {tabs.length > 1 && (
                     <button
+                      data-testid={`tab-close-${tab.id}`}
                       onClick={(e) => closeTab(tab.id, e)}
                       className="opacity-0 group-hover:opacity-100 hover:text-stone-900 dark:hover:text-stone-100 p-0.5 rounded transition-opacity"
                     >
@@ -193,6 +196,7 @@ export function App() {
             })}
 
             <button
+              data-testid="btn-new-tab"
               onClick={() => createNewTab(activeTab.module)}
               className="p-1 text-stone-400 hover:text-stone-700 dark:hover:text-stone-200 rounded transition-colors"
               title="New Tab"
@@ -206,6 +210,7 @@ export function App() {
         <div className="flex items-center space-x-2 text-xs">
           {/* Command Palette Trigger */}
           <button
+            data-testid="btn-command-palette"
             onClick={() => setIsPaletteOpen(true)}
             className="flex items-center space-x-1 px-2.5 py-1 rounded bg-stone-100 hover:bg-stone-200 dark:bg-stone-800 dark:hover:bg-stone-700 text-stone-600 dark:text-stone-300 transition-colors"
           >
@@ -217,6 +222,7 @@ export function App() {
           </button>
 
           <button
+            data-testid="btn-open-file"
             onClick={handleOpenFile}
             className="flex items-center space-x-1 px-2.5 py-1 rounded bg-stone-100 hover:bg-stone-200 dark:bg-stone-800 dark:hover:bg-stone-700 text-stone-700 dark:text-stone-300 transition-colors"
           >
@@ -227,6 +233,7 @@ export function App() {
           <div className="h-4 w-px bg-stone-200 dark:bg-stone-800" />
 
           <button
+            data-testid="btn-theme-toggle"
             onClick={() => setIsDark(!isDark)}
             className="p-1 rounded text-stone-500 hover:text-stone-800 dark:hover:text-stone-200 transition-colors"
             title="Toggle Dark / Light Theme"
@@ -241,10 +248,10 @@ export function App() {
         {/* Status sub-bar */}
         <div className="bg-stone-50 dark:bg-stone-900/60 border-b border-stone-200 dark:border-stone-800 px-4 py-1 text-[11px] text-stone-500 flex items-center justify-between select-none">
           <div className="flex items-center space-x-2">
-            <span className="font-medium text-stone-700 dark:text-stone-300">{activeTab.title}</span>
-            <span className="text-stone-400">({statusMessage})</span>
+            <span data-testid="status-tab-title" className="font-medium text-stone-700 dark:text-stone-300">{activeTab.title}</span>
+            <span data-testid="status-message" className="text-stone-400">({statusMessage})</span>
           </div>
-          <div className="flex items-center space-x-1 text-emerald-600 dark:text-emerald-400 font-medium">
+          <div data-testid="zero-cloud-badge" className="flex items-center space-x-1 text-emerald-600 dark:text-emerald-400 font-medium">
             <ShieldCheck className="w-3 h-3" />
             <span>100% Local-First &amp; Zero-Cloud</span>
           </div>

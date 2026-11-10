@@ -18,5 +18,8 @@ export default defineConfig({
   server: {
     port: 3000,
     open: false,
+    watch: {
+      ignored: ['**/target/**', '**/tests/**', '**/src-tauri/target/**'],
+    },
   },
 });

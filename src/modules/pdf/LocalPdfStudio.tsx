@@ -300,6 +300,7 @@ export const LocalPdfStudio: React.FC<LocalPdfStudioProps> = ({
         {/* Document Title */}
         <div className="flex items-center space-x-2">
           <input
+            data-testid="pdf-title-input"
             type="text"
             value={docTitle}
             onChange={(e) => setDocTitle(e.target.value)}
@@ -311,6 +312,7 @@ export const LocalPdfStudio: React.FC<LocalPdfStudioProps> = ({
         {/* Tools Palette */}
         <div className="flex items-center space-x-1 bg-stone-100 dark:bg-stone-800 p-0.5 rounded-lg">
           <button
+            data-testid="btn-pdf-add-text"
             onClick={() => {
               setActiveTool(activeTool === 'text' ? 'select' : 'text');
               setSelectedId(null);
@@ -327,6 +329,7 @@ export const LocalPdfStudio: React.FC<LocalPdfStudioProps> = ({
           </button>
 
           <button
+            data-testid="btn-pdf-sign"
             onClick={() => {
               setActiveTool(activeTool === 'sign' ? 'select' : 'sign');
               setSelectedId(null);
@@ -346,6 +349,7 @@ export const LocalPdfStudio: React.FC<LocalPdfStudioProps> = ({
 
           {/* Page Navigation */}
           <button
+            data-testid="btn-pdf-prev-page"
             onClick={() => setCurrentPage((p) => Math.max(0, p - 1))}
             disabled={currentPage === 0}
             className="p-1 rounded text-stone-600 dark:text-stone-400 disabled:opacity-30 hover:bg-stone-200 dark:hover:bg-stone-700"
@@ -354,11 +358,12 @@ export const LocalPdfStudio: React.FC<LocalPdfStudioProps> = ({
             <ChevronLeft className="w-4 h-4" />
           </button>
 
-          <span className="font-mono text-xs px-1 text-stone-600 dark:text-stone-400">
+          <span data-testid="pdf-page-indicator" className="font-mono text-xs px-1 text-stone-600 dark:text-stone-400">
             {pages.length > 0 ? `${currentPage + 1} / ${pages.length}` : '0 / 0'}
           </span>
 
           <button
+            data-testid="btn-pdf-next-page"
             onClick={() => setCurrentPage((p) => Math.min(pages.length - 1, p + 1))}
             disabled={currentPage >= pages.length - 1}
             className="p-1 rounded text-stone-600 dark:text-stone-400 disabled:opacity-30 hover:bg-stone-200 dark:hover:bg-stone-700"
@@ -370,6 +375,7 @@ export const LocalPdfStudio: React.FC<LocalPdfStudioProps> = ({
           <div className="h-4 w-px bg-stone-300 dark:bg-stone-700 mx-1" />
 
           <button
+            data-testid="btn-pdf-delete-page"
             onClick={handleDeleteCurrentPage}
             disabled={pages.length <= 1}
             className="p-1 text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/30 rounded disabled:opacity-30 transition-colors"
@@ -384,6 +390,7 @@ export const LocalPdfStudio: React.FC<LocalPdfStudioProps> = ({
           {/* Reflow Button */}
           {onOpenInWriter && (
             <button
+              data-testid="btn-pdf-edit-in-writer"
               onClick={handleEditInWriter}
               disabled={isExtracting || !pdfDocProxy}
               className="flex items-center space-x-1 px-2.5 py-1 rounded bg-stone-100 hover:bg-stone-200 dark:bg-stone-800 dark:hover:bg-stone-700 text-stone-700 dark:text-stone-300 transition-colors font-medium text-[11px]"
@@ -396,14 +403,16 @@ export const LocalPdfStudio: React.FC<LocalPdfStudioProps> = ({
 
           <div className="flex items-center space-x-0.5 text-stone-500">
             <button
+              data-testid="btn-pdf-zoom-out"
               onClick={() => setZoom((z) => Math.max(0.6, Math.round((z - 0.1) * 10) / 10))}
               className="p-1 hover:text-stone-800 dark:hover:text-stone-200"
               title="Zoom Out"
             >
               <ZoomOut className="w-3.5 h-3.5" />
             </button>
-            <span className="font-mono text-[11px] w-9 text-center">{Math.round(zoom * 100)}%</span>
+            <span data-testid="pdf-zoom-level" className="font-mono text-[11px] w-9 text-center">{Math.round(zoom * 100)}%</span>
             <button
+              data-testid="btn-pdf-zoom-in"
               onClick={() => setZoom((z) => Math.min(2.5, Math.round((z + 0.1) * 10) / 10))}
               className="p-1 hover:text-stone-800 dark:hover:text-stone-200"
               title="Zoom In"
@@ -413,6 +422,7 @@ export const LocalPdfStudio: React.FC<LocalPdfStudioProps> = ({
           </div>
 
           <button
+            data-testid="btn-save-pdf"
             onClick={handleSavePdf}
             className="flex items-center space-x-1.5 px-3 py-1 rounded bg-blue-600 hover:bg-blue-500 text-white font-medium transition-colors"
             title="Save as Flattened PDF"
@@ -426,7 +436,7 @@ export const LocalPdfStudio: React.FC<LocalPdfStudioProps> = ({
       {/* Main Workspace (Thumbnails + Page Viewport) */}
       <div className="flex-1 flex overflow-hidden">
         {/* Thumbnails Sidebar */}
-        <aside className="w-44 border-r border-stone-200 dark:border-stone-800 bg-white dark:bg-stone-900 overflow-y-auto p-3 space-y-3">
+        <aside data-testid="pdf-thumbnail-sidebar" className="w-44 border-r border-stone-200 dark:border-stone-800 bg-white dark:bg-stone-900 overflow-y-auto p-3 space-y-3">
           <div className="text-[11px] font-semibold text-stone-400 uppercase tracking-wider mb-2">
             Pages ({pages.length})
           </div>
@@ -434,6 +444,7 @@ export const LocalPdfStudio: React.FC<LocalPdfStudioProps> = ({
             pages.map((p, idx) => (
               <div
                 key={idx}
+                data-testid={`pdf-thumbnail-${idx + 1}`}
                 onClick={() => setCurrentPage(idx)}
                 className={`p-2 rounded-lg cursor-pointer transition-all border text-center ${
                   currentPage === idx
@@ -450,9 +461,10 @@ export const LocalPdfStudio: React.FC<LocalPdfStudioProps> = ({
         </aside>
 
         {/* PDF Page Canvas Viewport */}
-        <div className="flex-1 overflow-auto p-8 flex items-center justify-center relative">
+        <div data-testid="pdf-viewport" className="flex-1 overflow-auto p-8 flex items-center justify-center relative">
           {/* Main Document Box */}
           <div
+            data-testid="pdf-canvas-container"
             onClick={handleCanvasClick}
             style={{
               width: `${activePageInfo.width * zoom}px`,
@@ -463,14 +475,14 @@ export const LocalPdfStudio: React.FC<LocalPdfStudioProps> = ({
           >
             {/* Active tool banner */}
             {activeTool !== 'select' && (
-              <div className="absolute top-3 left-3 bg-blue-600/90 text-white px-2.5 py-1 rounded text-xs z-30 shadow-xs pointer-events-none flex items-center space-x-1.5">
+              <div data-testid="pdf-tool-banner" className="absolute top-3 left-3 bg-blue-600/90 text-white px-2.5 py-1 rounded text-xs z-30 shadow-xs pointer-events-none flex items-center space-x-1.5">
                 <span>Click anywhere on the document to place {activeTool === 'sign' ? 'signature' : 'text box'}</span>
               </div>
             )}
 
             {/* Rendering Spinner */}
             {isRendering && (
-              <div className="absolute inset-0 bg-white/70 dark:bg-stone-900/70 z-20 flex items-center justify-center backdrop-blur-xs">
+              <div data-testid="pdf-rendering-spinner" className="absolute inset-0 bg-white/70 dark:bg-stone-900/70 z-20 flex items-center justify-center backdrop-blur-xs">
                 <div className="flex items-center space-x-2 text-xs text-stone-600 dark:text-stone-300 font-medium">
                   <Loader2 className="w-4 h-4 animate-spin text-blue-600" />
                   <span>Rendering PDF...</span>
@@ -479,7 +491,7 @@ export const LocalPdfStudio: React.FC<LocalPdfStudioProps> = ({
             )}
 
             {/* Real PDF.js Canvas */}
-            <canvas ref={mainCanvasRef} className="block w-full h-full object-contain pointer-events-none" />
+            <canvas ref={mainCanvasRef} data-testid="pdf-main-canvas" className="block w-full h-full object-contain pointer-events-none" />
 
             {/* Interactive Annotations & Direct In-Place Text Editing Overlay */}
             {currentAnnotations.map((annot) => {
@@ -493,6 +505,7 @@ export const LocalPdfStudio: React.FC<LocalPdfStudioProps> = ({
               return (
                 <div
                   key={annot.id}
+                  data-testid={`pdf-annotation-${annot.id}`}
                   onClick={(e) => {
                     e.stopPropagation();
                     setSelectedId(annot.id);
@@ -512,6 +525,7 @@ export const LocalPdfStudio: React.FC<LocalPdfStudioProps> = ({
                   {/* Floating Action Bar when selected or editing */}
                   {(isSelected || isEditing) && (
                     <div
+                      data-testid="pdf-annotation-toolbar"
                       onClick={(e) => e.stopPropagation()}
                       className="absolute bottom-full left-0 mb-1 bg-stone-900 text-white rounded shadow-lg px-2 py-1 flex items-center space-x-1.5 text-[11px] whitespace-nowrap z-40"
                     >
@@ -520,6 +534,7 @@ export const LocalPdfStudio: React.FC<LocalPdfStudioProps> = ({
                         {FONT_SIZES.map((sz) => (
                           <button
                             key={sz}
+                            data-testid={`btn-pdf-fontsize-${sz}`}
                             onClick={() => updateAnnotation(annot.id, { size: sz })}
                             className={`px-1 rounded ${
                               (annot.size || 14) === sz ? 'bg-blue-600 font-bold' : 'hover:bg-stone-800 text-stone-300'
@@ -535,6 +550,7 @@ export const LocalPdfStudio: React.FC<LocalPdfStudioProps> = ({
                         {COLOR_PRESETS.map((col) => (
                           <button
                             key={col.name}
+                            data-testid={`btn-pdf-color-${col.name.toLowerCase()}`}
                             onClick={() => updateAnnotation(annot.id, { color: { r: col.r, g: col.g, b: col.b } })}
                             style={{ backgroundColor: col.hex }}
                             className="w-3.5 h-3.5 rounded-full border border-white/40 hover:scale-110 transition-transform"
@@ -545,6 +561,7 @@ export const LocalPdfStudio: React.FC<LocalPdfStudioProps> = ({
 
                       {/* Whiteout / Mask toggle */}
                       <button
+                        data-testid="btn-pdf-whiteout-toggle"
                         onClick={() => updateAnnotation(annot.id, { whiteout: !annot.whiteout })}
                         className={`flex items-center space-x-1 px-1.5 py-0.5 rounded transition-colors ${
                           annot.whiteout ? 'bg-amber-600 text-white' : 'hover:bg-stone-800 text-stone-300'
@@ -557,6 +574,7 @@ export const LocalPdfStudio: React.FC<LocalPdfStudioProps> = ({
 
                       {/* Delete */}
                       <button
+                        data-testid="btn-pdf-delete-annot"
                         onClick={() => deleteAnnotation(annot.id)}
                         className="p-1 hover:text-red-400 rounded"
                         title="Delete text box"
@@ -567,6 +585,7 @@ export const LocalPdfStudio: React.FC<LocalPdfStudioProps> = ({
                       {/* Done Editing */}
                       {isEditing && (
                         <button
+                          data-testid="btn-pdf-finish-edit"
                           onClick={() => setEditingId(null)}
                           className="p-1 bg-blue-600 hover:bg-blue-500 rounded text-white"
                           title="Finish editing"
@@ -587,6 +606,7 @@ export const LocalPdfStudio: React.FC<LocalPdfStudioProps> = ({
                       className="p-1 border border-blue-500 rounded shadow-md"
                     >
                       <input
+                        data-testid="pdf-annotation-input"
                         type="text"
                         autoFocus
                         value={annot.text}
@@ -607,6 +627,7 @@ export const LocalPdfStudio: React.FC<LocalPdfStudioProps> = ({
                     </div>
                   ) : (
                     <div
+                      data-testid="pdf-annotation-display"
                       style={{
                         fontSize: `${(annot.size || 14) * zoom}px`,
                         color: annot.color

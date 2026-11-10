@@ -47,10 +47,15 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({ isOpen, onClose,
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [isOpen, onClose]);
 
-  const filtered = commands.filter((cmd) =>
-    cmd.title.toLowerCase().includes(query.toLowerCase()) ||
-    (cmd.subtitle && cmd.subtitle.toLowerCase().includes(query.toLowerCase()))
-  );
+  const filtered = commands.filter((cmd) => {
+    const q = query.toLowerCase();
+    return (
+      cmd.title.toLowerCase().includes(q) ||
+      (cmd.subtitle && cmd.subtitle.toLowerCase().includes(q)) ||
+      cmd.category.toLowerCase().includes(q) ||
+      cmd.id.toLowerCase().includes(q)
+    );
+  });
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'ArrowDown') {
@@ -72,10 +77,12 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({ isOpen, onClose,
 
   return (
     <div
+      data-testid="command-palette-backdrop"
       onClick={onClose}
       className="fixed inset-0 z-50 bg-black/40 backdrop-blur-xs flex items-start justify-center pt-24 px-4"
     >
       <div
+        data-testid="command-palette-modal"
         onClick={(e) => e.stopPropagation()}
         className="w-full max-w-lg bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 rounded-xl shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-100"
       >
@@ -83,6 +90,7 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({ isOpen, onClose,
         <div className="h-12 border-b border-stone-200 dark:border-stone-800 px-4 flex items-center space-x-2.5">
           <Search className="w-4 h-4 text-stone-400" />
           <input
+            data-testid="command-palette-input"
             type="text"
             autoFocus
             value={query}
@@ -99,6 +107,7 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({ isOpen, onClose,
             <span>K</span>
           </kbd>
           <button
+            data-testid="btn-command-palette-close"
             onClick={onClose}
             className="p-1 rounded text-stone-400 hover:text-stone-700 dark:hover:text-stone-200"
           >
@@ -107,15 +116,16 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({ isOpen, onClose,
         </div>
 
         {/* Command List */}
-        <div className="max-h-72 overflow-y-auto p-1.5 select-none">
+        <div data-testid="command-palette-list" className="max-h-72 overflow-y-auto p-1.5 select-none">
           {filtered.length === 0 ? (
-            <div className="py-8 text-center text-xs text-stone-400">
+            <div data-testid="command-palette-empty" className="py-8 text-center text-xs text-stone-400">
               No matching commands found.
             </div>
           ) : (
             filtered.map((cmd, idx) => (
               <div
                 key={cmd.id}
+                data-testid={`command-item-${cmd.id}`}
                 onClick={() => {
                   cmd.run();
                   onClose();
