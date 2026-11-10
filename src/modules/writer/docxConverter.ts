@@ -1,12 +1,40 @@
 import mammoth from 'mammoth';
+import JSZip from 'jszip';
 import { Document, Packer, Paragraph, TextRun, HeadingLevel, Table, TableRow, TableCell, WidthType, BorderStyle } from 'docx';
 
 /**
- * Imports DOCX binary buffer and converts to clean HTML for Tiptap
+ * Imports DOCX binary buffer and converts to clean HTML for Tiptap, preserving horizontal rules
  */
 export async function importFromDocx(buffer: ArrayBuffer): Promise<string> {
-  const result = await mammoth.convertToHtml({ arrayBuffer: buffer });
-  return result.value || '<p></p>';
+  let processedBuffer: ArrayBuffer = buffer;
+
+  try {
+    // Pre-process docx zip to retain thematic breaks (horizontal lines)
+    const zip = await JSZip.loadAsync(buffer);
+    const documentXmlFile = zip.file('word/document.xml');
+    if (documentXmlFile) {
+      const xml = await documentXmlFile.async('string');
+      // Detect paragraphs with bottom border (w:pBdr with w:bottom) or thematic breaks
+      if (xml.includes('w:pBdr') || xml.includes('w:bottom')) {
+        const modifiedXml = xml.replace(/(<w:p\b[^>]*>[\s\S]*?<w:pBdr>[\s\S]*?<\/w:pPr>)([\s\S]*?<\/w:p>)/g, (_match, p1, p2) => {
+          return p1 + '<w:r><w:t>__LOCALOFFICE_THEMATIC_BREAK__</w:t></w:r>' + p2;
+        });
+        zip.file('word/document.xml', modifiedXml);
+        processedBuffer = await zip.generateAsync({ type: 'arraybuffer' });
+      }
+    }
+  } catch (err) {
+    console.warn('Zip pre-processing for horizontal rules skipped:', err);
+  }
+
+  // Support both browser and Node/Vitest environments
+  const isNode = typeof Buffer !== 'undefined';
+  const mammothInput = isNode
+    ? { buffer: Buffer.from(processedBuffer) }
+    : { arrayBuffer: processedBuffer };
+
+  const result = await mammoth.convertToHtml(mammothInput as unknown as { arrayBuffer: ArrayBuffer });
+  return (result.value || '<p></p>').replace(/<p>\s*__LOCALOFFICE_THEMATIC_BREAK__\s*<\/p>/g, '<hr />');
 }
 
 /**
@@ -50,6 +78,14 @@ export async function exportToDocx(htmlContent: string, title: string = 'Documen
               text: el.textContent || '',
               heading: HeadingLevel.HEADING_3,
               spacing: { before: 160, after: 80 },
+            })
+          );
+          break;
+        case 'hr':
+          children.push(
+            new Paragraph({
+              thematicBreak: true,
+              spacing: { before: 180, after: 180 },
             })
           );
           break;
@@ -106,8 +142,10 @@ export async function exportToDocx(htmlContent: string, title: string = 'Documen
     ],
   });
 
-  const blob = await Packer.toBlob(wordDoc);
-  return blob;
+  const arrayBuffer = await Packer.toArrayBuffer(wordDoc);
+  return new Blob([arrayBuffer], {
+    type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+  });
 }
 
 function parseParagraphElement(el: HTMLElement): Paragraph {

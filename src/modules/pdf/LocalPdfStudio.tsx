@@ -1,15 +1,47 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   Download, Trash2, ChevronLeft, ChevronRight, Type,
-  PenTool, ZoomIn, ZoomOut, CheckCircle2
+  PenTool, ZoomIn, ZoomOut, CheckCircle2, Loader2
 } from 'lucide-react';
 import { createSamplePdf, inspectPdf, applyAnnotations, removePage, PdfAnnotation, PdfPageInfo } from './pdfEngine';
+import { renderPdfPageToCanvas } from './pdfRenderer';
 import { saveLocalFile, OpenedFile } from '../../core/fs/fileSystemBus';
 
 interface LocalPdfStudioProps {
   initialFile?: OpenedFile | null;
   onSaveStatus?: (message: string) => void;
 }
+
+// Subcomponent for thumbnail rendering
+const PdfThumbnail: React.FC<{ buffer: ArrayBuffer; pageNumber: number }> = ({ buffer, pageNumber }) => {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const [loaded, setLoaded] = useState(false);
+
+  useEffect(() => {
+    let isCancelled = false;
+    if (canvasRef.current && buffer) {
+      renderPdfPageToCanvas(buffer, pageNumber, canvasRef.current, 0.22)
+        .then(() => {
+          if (!isCancelled) setLoaded(true);
+        })
+        .catch((err) => {
+          if (!isCancelled) console.warn(`Thumbnail render error (page ${pageNumber}):`, err);
+        });
+    }
+    return () => {
+      isCancelled = true;
+    };
+  }, [buffer, pageNumber]);
+
+  return (
+    <div className="w-full aspect-[3/4] bg-stone-100 dark:bg-stone-800 rounded border border-stone-200 dark:border-stone-700/60 mb-1 flex items-center justify-center overflow-hidden relative">
+      <canvas ref={canvasRef} className={`w-full h-auto max-h-full object-contain ${loaded ? 'block' : 'hidden'}`} />
+      {!loaded && (
+        <span className="text-xs text-stone-400">Page {pageNumber}</span>
+      )}
+    </div>
+  );
+};
 
 export const LocalPdfStudio: React.FC<LocalPdfStudioProps> = ({ initialFile, onSaveStatus }) => {
   const [pdfBuffer, setPdfBuffer] = useState<ArrayBuffer | null>(null);
@@ -19,7 +51,10 @@ export const LocalPdfStudio: React.FC<LocalPdfStudioProps> = ({ initialFile, onS
   const [annotations, setAnnotations] = useState<PdfAnnotation[]>([]);
   const [activeTool, setActiveTool] = useState<'select' | 'text' | 'sign'>('select');
   const [inputText, setInputText] = useState<string>('Approved by LocalOffice');
-  const [zoom, setZoom] = useState<number>(1);
+  const [zoom, setZoom] = useState<number>(1.1);
+  const [isRendering, setIsRendering] = useState<boolean>(false);
+
+  const mainCanvasRef = useRef<HTMLCanvasElement>(null);
 
   // Initialize or load file
   useEffect(() => {
@@ -48,6 +83,26 @@ export const LocalPdfStudio: React.FC<LocalPdfStudioProps> = ({ initialFile, onS
 
     init();
   }, [initialFile, onSaveStatus]);
+
+  // Render active PDF page onto canvas when pdfBuffer, currentPage, or zoom changes
+  useEffect(() => {
+    let isCancelled = false;
+    if (!pdfBuffer || !mainCanvasRef.current || pages.length === 0) return;
+
+    setIsRendering(true);
+    renderPdfPageToCanvas(pdfBuffer, currentPage + 1, mainCanvasRef.current, zoom)
+      .then(() => {
+        if (!isCancelled) setIsRendering(false);
+      })
+      .catch((err) => {
+        console.error('PDF page render error:', err);
+        if (!isCancelled) setIsRendering(false);
+      });
+
+    return () => {
+      isCancelled = true;
+    };
+  }, [pdfBuffer, currentPage, zoom, pages.length]);
 
   const handleCanvasClick = (e: React.MouseEvent<HTMLDivElement>) => {
     if (activeTool === 'select' || !pdfBuffer) return;
@@ -88,7 +143,6 @@ export const LocalPdfStudio: React.FC<LocalPdfStudioProps> = ({ initialFile, onS
       const info = await inspectPdf(newBuffer);
       setPages(info.pages);
       setCurrentPage((prev) => Math.max(0, Math.min(prev, info.pageCount - 1)));
-      // Filter out annotations from deleted page and adjust subsequent indices
       setAnnotations((prev) =>
         prev
           .filter((a) => a.pageIndex !== currentPage)
@@ -212,7 +266,7 @@ export const LocalPdfStudio: React.FC<LocalPdfStudioProps> = ({ initialFile, onS
         <div className="flex items-center space-x-2">
           <div className="flex items-center space-x-0.5 text-stone-500">
             <button
-              onClick={() => setZoom((z) => Math.max(0.6, z - 0.1))}
+              onClick={() => setZoom((z) => Math.max(0.6, Math.round((z - 0.1) * 10) / 10))}
               className="p-1 hover:text-stone-800 dark:hover:text-stone-200"
               title="Zoom Out"
             >
@@ -220,7 +274,7 @@ export const LocalPdfStudio: React.FC<LocalPdfStudioProps> = ({ initialFile, onS
             </button>
             <span className="font-mono text-[11px] w-9 text-center">{Math.round(zoom * 100)}%</span>
             <button
-              onClick={() => setZoom((z) => Math.min(2.0, z + 0.1))}
+              onClick={() => setZoom((z) => Math.min(2.5, Math.round((z + 0.1) * 10) / 10))}
               className="p-1 hover:text-stone-800 dark:hover:text-stone-200"
               title="Zoom In"
             >
@@ -242,11 +296,11 @@ export const LocalPdfStudio: React.FC<LocalPdfStudioProps> = ({ initialFile, onS
       {/* Main Workspace (Thumbnails + Page Viewport) */}
       <div className="flex-1 flex overflow-hidden">
         {/* Thumbnails Sidebar */}
-        <aside className="w-40 border-r border-stone-200 dark:border-stone-800 bg-white dark:bg-stone-900 overflow-y-auto p-3 space-y-3">
+        <aside className="w-44 border-r border-stone-200 dark:border-stone-800 bg-white dark:bg-stone-900 overflow-y-auto p-3 space-y-3">
           <div className="text-[11px] font-semibold text-stone-400 uppercase tracking-wider mb-2">
             Pages ({pages.length})
           </div>
-          {pages.map((p, idx) => (
+          {pdfBuffer && pages.map((p, idx) => (
             <div
               key={idx}
               onClick={() => setCurrentPage(idx)}
@@ -256,18 +310,17 @@ export const LocalPdfStudio: React.FC<LocalPdfStudioProps> = ({ initialFile, onS
                   : 'border-stone-200 dark:border-stone-800 hover:border-stone-300 dark:hover:border-stone-700'
               }`}
             >
-              <div className="w-full aspect-[3/4] bg-stone-100 dark:bg-stone-800 rounded border border-stone-200 dark:border-stone-700/60 mb-1 flex items-center justify-center text-xs text-stone-400">
-                Page {p.pageNumber}
-              </div>
+              <PdfThumbnail buffer={pdfBuffer} pageNumber={idx + 1} />
               <span className="text-[10px] text-stone-500">
-                {Math.round(p.width)} × {Math.round(p.height)}
+                Page {p.pageNumber} ({Math.round(p.width)} × {Math.round(p.height)})
               </span>
             </div>
           ))}
         </aside>
 
-        {/* PDF Page Canvas */}
-        <div className="flex-1 overflow-auto p-8 flex items-center justify-center">
+        {/* PDF Page Canvas Viewport */}
+        <div className="flex-1 overflow-auto p-8 flex items-center justify-center relative">
+          {/* Main Document Box */}
           <div
             onClick={handleCanvasClick}
             style={{
@@ -275,38 +328,31 @@ export const LocalPdfStudio: React.FC<LocalPdfStudioProps> = ({ initialFile, onS
               height: `${activePageInfo.height * zoom}px`,
               cursor: activeTool !== 'select' ? 'crosshair' : 'default',
             }}
-            className="bg-white shadow-md border border-stone-300 dark:border-stone-700 rounded-sm relative overflow-hidden transition-all duration-150"
+            className="bg-white shadow-lg border border-stone-300 dark:border-stone-700 rounded-sm relative overflow-hidden transition-all duration-150 flex items-center justify-center"
           >
             {/* Active tool indicator helper */}
             {activeTool !== 'select' && (
               <div className="absolute top-3 left-3 bg-blue-600/90 text-white px-2.5 py-1 rounded text-xs z-30 shadow-xs pointer-events-none flex items-center space-x-1.5">
                 <CheckCircle2 className="w-3 h-3" />
-                <span>Click anywhere on the page to place {activeTool === 'sign' ? 'signature' : 'text'}</span>
+                <span>Click anywhere on the document to place {activeTool === 'sign' ? 'signature' : 'text'}</span>
               </div>
             )}
 
-            {/* Mock Vector Document Background */}
-            <div className="absolute inset-0 p-12 select-none flex flex-col justify-between text-stone-800">
-              <div className="space-y-4">
-                <div className="h-8 bg-blue-500/10 rounded w-1/2"></div>
-                <div className="h-4 bg-stone-200 rounded w-3/4"></div>
-                <div className="h-4 bg-stone-200 rounded w-5/6"></div>
-                <div className="h-4 bg-stone-200 rounded w-2/3"></div>
-                <div className="h-32 bg-stone-100 rounded-lg border border-stone-200 mt-6 p-4">
-                  <div className="h-3 bg-stone-200 rounded w-full mb-2"></div>
-                  <div className="h-3 bg-stone-200 rounded w-4/5 mb-2"></div>
-                  <div className="h-3 bg-stone-200 rounded w-3/4"></div>
+            {/* Rendering Spinner */}
+            {isRendering && (
+              <div className="absolute inset-0 bg-white/70 dark:bg-stone-900/70 z-20 flex items-center justify-center backdrop-blur-xs">
+                <div className="flex items-center space-x-2 text-xs text-stone-600 dark:text-stone-300 font-medium">
+                  <Loader2 className="w-4 h-4 animate-spin text-blue-600" />
+                  <span>Rendering PDF...</span>
                 </div>
               </div>
-              <div className="flex justify-between text-xs text-stone-400 border-t border-stone-200 pt-3">
-                <span>LocalPDF Document Canvas</span>
-                <span>Page {currentPage + 1}</span>
-              </div>
-            </div>
+            )}
+
+            {/* Real PDF.js Canvas */}
+            <canvas ref={mainCanvasRef} className="block w-full h-full object-contain pointer-events-none" />
 
             {/* Live Interactive Annotations Overlay */}
             {currentAnnotations.map((annot) => {
-              // Convert PDF coordinates back to display coordinates
               const scale = zoom;
               const displayX = (annot.x / activePageInfo.width) * (activePageInfo.width * scale);
               const displayY = ((activePageInfo.height - annot.y) / activePageInfo.height) * (activePageInfo.height * scale);
@@ -320,7 +366,7 @@ export const LocalPdfStudio: React.FC<LocalPdfStudioProps> = ({ initialFile, onS
                     fontSize: `${(annot.size || 12) * zoom}px`,
                     color: annot.color ? `rgb(${annot.color.r * 255}, ${annot.color.g * 255}, ${annot.color.b * 255})` : '#dc2626',
                   }}
-                  className="absolute font-semibold pointer-events-auto transform -translate-y-full px-1.5 py-0.5 rounded border border-dashed border-red-400/50 bg-red-50/20"
+                  className="absolute font-semibold pointer-events-auto transform -translate-y-full px-1.5 py-0.5 rounded border border-dashed border-red-400/60 bg-red-50/30"
                 >
                   {annot.text}
                 </div>
@@ -336,7 +382,7 @@ export const LocalPdfStudio: React.FC<LocalPdfStudioProps> = ({ initialFile, onS
           <span>{annotations.length} annotations placed</span>
         </div>
         <div>
-          <span>LocalPDF Studio • Interactive Reflow &amp; Annotation</span>
+          <span>LocalPDF Studio • Mozilla PDF.js Vector Engine</span>
         </div>
       </footer>
     </div>
