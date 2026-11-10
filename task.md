@@ -43,9 +43,10 @@ Build **LocalOffice**: a standalone, modern, minimalist, browser-friendly, local
     - `User Journey`: Open sample PDF, add text annotation and highlight, reorder pages, click "Save PDF", verify output matches.
     - `Observable Done-When`: PDF canvas renders crisp vector text at all zoom levels (50% to 300%).
 
-- [ ] **Task 5: Minimalist Shell, Command Palette (Ctrl+K) & Tab Manager**
+- [x] **Task 5: Minimalist Shell, Command Palette (Ctrl+K) & Tab Manager**
   - **Verify**: `npm run build && npx vitest run src/components/__tests__`
   - **Description**: Construct unified linear/modern shell: tab management, global `Ctrl+K` command palette, dark/light theme toggle, and keyboard shortcuts.
+  - **Status**: Completed. Verified multi-tab workspace, Command Palette modal with shortcuts, and theme toggle.
   - **`[E2E_CONTRACT] (Non-Headless)`**:
     - `Launch`: `npm run dev`
     - `User Journey`: Press `Ctrl+K`, type "New Sheet", press Enter, verify active tab switches to LocalSheets.
