@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { FileText, Table, FileSpreadsheet, Plus, FolderOpen, Sun, Moon, ShieldCheck } from 'lucide-react';
 import { openLocalFile, OpenedFile } from './core/fs/fileSystemBus';
 import { LocalWriter } from './modules/writer/LocalWriter';
+import { LocalSheets } from './modules/sheets/LocalSheets';
 
 export type ActiveModule = 'writer' | 'sheets' | 'pdf';
 
@@ -133,18 +134,16 @@ export function App() {
         {/* Active Module Canvas */}
         {activeModule === 'writer' ? (
           <LocalWriter initialFile={activeFile} onSaveStatus={setStatusMessage} />
+        ) : activeModule === 'sheets' ? (
+          <LocalSheets initialFile={activeFile} onSaveStatus={setStatusMessage} />
         ) : (
           <div className="flex-1 flex items-center justify-center p-8">
             <div className="max-w-md w-full text-center space-y-4">
               <div className="w-12 h-12 rounded-xl bg-blue-500/10 text-blue-500 flex items-center justify-center mx-auto">
-                {activeModule === 'sheets' && <Table className="w-6 h-6" />}
-                {activeModule === 'pdf' && <FileSpreadsheet className="w-6 h-6" />}
+                <FileSpreadsheet className="w-6 h-6" />
               </div>
               <div>
-                <h2 className="text-lg font-semibold capitalize">
-                  {activeModule === 'sheets' && 'LocalSheets Grid Engine'}
-                  {activeModule === 'pdf' && 'LocalPDF Studio'}
-                </h2>
+                <h2 className="text-lg font-semibold capitalize">LocalPDF Studio</h2>
                 <p className="text-sm text-stone-500 dark:text-stone-400 mt-1">
                   Ready for component activation.
                 </p>

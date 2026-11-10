@@ -25,9 +25,10 @@ Build **LocalOffice**: a standalone, modern, minimalist, browser-friendly, local
     - `User Journey`: Type `/table`, create 3x3 table, format content, click Export DOCX, verify file download triggers and document content matches.
     - `Observable Done-When`: Rich text formatting is preserved; typing latency is under 16ms.
 
-- [ ] **Task 3: LocalSheets Engine (Grid, Formulas, XLSX Import/Export)** `[GATE: QA]`
+- [x] **Task 3: LocalSheets Engine (Grid, Formulas, XLSX Import/Export)** `[GATE: QA]`
   - **Verify**: `npx vitest run src/modules/sheets/__tests__`
   - **Description**: Integrate spreadsheet engine with formula parser (`SUM`, `AVERAGE`, `VLOOKUP`, `IF`). Implement `.xlsx` and `.csv` import/export via `SheetJS` / `exceljs`.
+  - **Status**: Completed. Verified reactive formula calculation, SheetJS XLSX/CSV I/O, multi-sheet tabs.
   - **`[E2E_CONTRACT] (Non-Headless)`**:
     - `Launch`: `npm run dev`
     - `User Journey`: Switch to Sheets tab, enter numbers in A1:A4, enter `=SUM(A1:A4)` in A5, verify calculation, export `.xlsx`.
