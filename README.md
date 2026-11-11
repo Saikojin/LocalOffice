@@ -105,5 +105,37 @@ Automated matrix release builds are configured via GitHub Actions in `.github/wo
 
 ---
 
+## 📋 Format Support & Capabilities Boundaries
+
+LocalOffice prioritizes fast, 100% private, local-first client execution. To ensure complete clarity and transparency, here is an honest capabilities and boundaries matrix:
+
+| Application / Format | Core Capabilities | Boundaries & Limitations |
+| :--- | :--- | :--- |
+| **LocalWriter**<br>`.docx`, `.md`, `.txt` | Lightweight authoring, typography, markdown conversions, and clean OpenXML generation. | Designed for standard documents; does not preserve complex enterprise Word template macros, active tracked changes, or proprietary shape layouts from corporate templates. |
+| **LocalSheets**<br>`.xlsx`, `.csv` | Fast in-memory reactive formula calculations for budgets, task lists, and inventory (`SUM`, `AVERAGE`, `COUNT`, `MAX`, `MIN`, `AutoSum`). | DOM-based table ideal for spreadsheets up to several hundred rows; not designed for 50,000-row enterprise workbooks or complex financial modeling functions (e.g. VLOOKUP/pivot tables). |
+| **LocalPdfStudio**<br>`.pdf` | Real Mozilla PDF.js vector rendering, multi-page thumbnail navigation, zoom, and interactive annotation/signing overlay with `#ffffff` whiteout masking. "Edit in Writer" extracts raw text for reflow. | PDF is a display format; text editing stamps new text with a mask over existing raster/vector content rather than reflowing underlying PDF font streams. |
+
+---
+
+## 💻 CLI & OS Shell Integration
+
+LocalOffice seamlessly integrates into your desktop workflow through multiple launch vectors:
+
+1. **Windows Explorer & Desktop File Managers:**
+   - **Right-Click Context Menu:** Right-click any supported file (`.docx`, `.xlsx`, `.csv`, `.pdf`, `.md`, `.txt`) and select **"Open with -> LocalOffice"**.
+   - **File Associations:** Double-clicking associated files directly launches LocalOffice with the document loaded in a tab.
+
+2. **Command Line Interface (CLI):**
+   - Launch LocalOffice directly from your terminal or command prompt targeting any file:
+     ```bash
+     localoffice <path-to-file>
+     ```
+   - *Example:* `localoffice ./documents/quarterly-budget.xlsx`
+
+3. **Native Drag-and-Drop Support:**
+   - Dragging any supported file directly onto the active LocalOffice window opens it immediately into a new or active tab without needing to browse via file pickers.
+
+---
+
 ## 🛡️ License
 MIT License.

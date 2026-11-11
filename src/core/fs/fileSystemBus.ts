@@ -58,10 +58,77 @@ export const OFFICE_FILE_FILTERS: Record<string, FileFilterType> = {
 };
 
 /**
+ * Checks if running inside Tauri desktop environment
+ */
+export function isTauri(): boolean {
+  return typeof window !== 'undefined' && '__TAURI_INTERNALS__' in window;
+}
+
+/**
  * Checks if File System Access API is supported in the current runtime
  */
 export function isFSApiSupported(): boolean {
   return typeof window !== 'undefined' && 'showOpenFilePicker' in window;
+}
+
+/**
+ * Retrieves startup file passed via OS command line / file association in Tauri
+ */
+export async function getStartupFile(): Promise<OpenedFile | null> {
+  if (!isTauri()) return null;
+  try {
+    const { invoke } = await import('@tauri-apps/api/core');
+    const result = await invoke<{
+      name: string;
+      path: string;
+      data: number[];
+      size: number;
+    } | null>('get_launch_file');
+
+    if (!result) return null;
+
+    const uint8 = new Uint8Array(result.data);
+    return {
+      name: result.name,
+      size: result.size,
+      type: getMimeFromExtension(result.name),
+      lastModified: Date.now(),
+      data: uint8.buffer as ArrayBuffer,
+    };
+  } catch (err) {
+    console.warn('Failed to get startup file via Tauri invoke:', err);
+    return null;
+  }
+}
+
+/**
+ * Reads a file directly from disk via Tauri backend
+ */
+export async function readFileFromDisk(path: string): Promise<OpenedFile | null> {
+  if (!isTauri()) return null;
+  try {
+    const { invoke } = await import('@tauri-apps/api/core');
+    const result = await invoke<{
+      name: string;
+      path: string;
+      data: number[];
+      size: number;
+    }>('read_file_from_disk', { path });
+
+    if (!result) return null;
+
+    const uint8 = new Uint8Array(result.data);
+    return {
+      name: result.name,
+      size: result.size,
+      type: getMimeFromExtension(result.name),
+      lastModified: Date.now(),
+      data: uint8.buffer as ArrayBuffer,
+    };
+  } catch (err) {
+    console.warn('Failed to read file from disk via Tauri invoke:', err);
+    return null;
+  }
 }
 
 /**

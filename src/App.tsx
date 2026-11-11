@@ -1,9 +1,9 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import {
   FileText, Table, FileSpreadsheet, Plus, FolderOpen, Sun, Moon,
   ShieldCheck, X, Command
 } from 'lucide-react';
-import { openLocalFile, OpenedFile } from './core/fs/fileSystemBus';
+import { openLocalFile, OpenedFile, isTauri, getStartupFile } from './core/fs/fileSystemBus';
 import { LocalWriter } from './modules/writer/LocalWriter';
 import { LocalSheets } from './modules/sheets/LocalSheets';
 import { LocalPdfStudio } from './modules/pdf/LocalPdfStudio';
@@ -18,6 +18,13 @@ export interface OfficeTab {
   file?: OpenedFile | null;
 }
 
+function getModuleFromFilename(filename: string): ActiveModule {
+  const ext = filename.split('.').pop()?.toLowerCase();
+  if (ext === 'xlsx' || ext === 'csv' || ext === 'xls') return 'sheets';
+  if (ext === 'pdf') return 'pdf';
+  return 'writer';
+}
+
 export function App() {
   const [tabs, setTabs] = useState<OfficeTab[]>([
     { id: '1', title: 'Document 1', module: 'writer' },
@@ -28,6 +35,66 @@ export function App() {
   const [isPaletteOpen, setIsPaletteOpen] = useState<boolean>(false);
 
   const activeTab = tabs.find((t) => t.id === activeTabId) || tabs[0];
+
+  const openFileInTab = useCallback((file: OpenedFile, replaceBlankFirstTab: boolean = false) => {
+    const mod = getModuleFromFilename(file.name);
+    const newTab: OfficeTab = {
+      id: Math.random().toString(36).substring(7),
+      title: file.name,
+      module: mod,
+      file,
+    };
+
+    setTabs((prev) => {
+      if (replaceBlankFirstTab && prev.length === 1 && prev[0].title === 'Document 1' && !prev[0].file) {
+        return [newTab];
+      }
+      return [...prev, newTab];
+    });
+    setActiveTabId(newTab.id);
+    setStatusMessage(`Opened ${file.name}`);
+  }, []);
+
+  // Tauri cold start file loading & subsequent single-instance open events
+  useEffect(() => {
+    if (!isTauri()) return;
+
+    let unlisten: (() => void) | undefined;
+
+    // Check cold-start launch file
+    getStartupFile().then((file) => {
+      if (file) {
+        openFileInTab(file, true);
+      }
+    });
+
+    // Listen for files opened while app is already running
+    import('@tauri-apps/api/event').then(({ listen }) => {
+      listen<{ name: string; path: string; data: number[]; size: number }>(
+        'open-file-payload',
+        (event) => {
+          const payload = event.payload;
+          if (payload && payload.name && payload.data) {
+            const uint8 = new Uint8Array(payload.data);
+            const opened: OpenedFile = {
+              name: payload.name,
+              size: payload.size,
+              type: 'application/octet-stream',
+              lastModified: Date.now(),
+              data: uint8.buffer as ArrayBuffer,
+            };
+            openFileInTab(opened, false);
+          }
+        }
+      ).then((unsub) => {
+        unlisten = unsub;
+      });
+    });
+
+    return () => {
+      if (unlisten) unlisten();
+    };
+  }, [openFileInTab]);
 
   // Global Ctrl+K hotkey
   useEffect(() => {
@@ -44,21 +111,32 @@ export function App() {
   const handleOpenFile = async () => {
     const file = await openLocalFile();
     if (file) {
-      const ext = file.name.split('.').pop()?.toLowerCase();
-      let mod: ActiveModule = 'writer';
-      if (ext === 'xlsx' || ext === 'csv' || ext === 'xls') mod = 'sheets';
-      else if (ext === 'pdf') mod = 'pdf';
+      openFileInTab(file, false);
+    }
+  };
 
-      const newTab: OfficeTab = {
-        id: Math.random().toString(36).substring(7),
-        title: file.name,
-        module: mod,
-        file,
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+  };
+
+  const handleDrop = async (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    const droppedFiles = Array.from(e.dataTransfer.files);
+    if (!droppedFiles.length) return;
+
+    for (const file of droppedFiles) {
+      const buffer = await file.arrayBuffer();
+      const opened: OpenedFile = {
+        name: file.name,
+        size: file.size,
+        type: file.type || 'application/octet-stream',
+        lastModified: file.lastModified,
+        data: buffer,
       };
-
-      setTabs((prev) => [...prev, newTab]);
-      setActiveTabId(newTab.id);
-      setStatusMessage(`Opened ${file.name}`);
+      openFileInTab(opened, false);
     }
   };
 
@@ -151,7 +229,12 @@ export function App() {
   ];
 
   return (
-    <div data-testid="app-root" className={`min-h-screen flex flex-col ${isDark ? 'dark bg-stone-950 text-stone-100' : 'bg-stone-50 text-stone-900'}`}>
+    <div
+      data-testid="app-root"
+      onDragOver={handleDragOver}
+      onDrop={handleDrop}
+      className={`min-h-screen flex flex-col ${isDark ? 'dark bg-stone-950 text-stone-100' : 'bg-stone-50 text-stone-900'}`}
+    >
       {/* Top Header Bar */}
       <header className="h-10 border-b border-stone-200 dark:border-stone-800 px-3 flex items-center justify-between select-none bg-white dark:bg-stone-900">
         <div className="flex items-center space-x-3">

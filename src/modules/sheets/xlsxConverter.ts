@@ -55,6 +55,11 @@ export function exportToXlsx(
       if (!parsed) return;
 
       if (parsed.row > maxRow) maxRow = parsed.row;
+      let colIdx = 0;
+      for (let i = 0; i < parsed.col.length; i++) {
+        colIdx = colIdx * 26 + (parsed.col.charCodeAt(i) - 64);
+      }
+      if (colIdx > maxCol) maxCol = colIdx;
 
       // Evaluate formula value for export
       const calculatedVal = evaluateCell(val, rawData);

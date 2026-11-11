@@ -107,7 +107,7 @@ export async function exportToDocx(htmlContent: string, title: string = 'Documen
           children.push(parseHtmlTableToDocx(el));
           break;
         case 'ul':
-        case 'ol':
+        case 'ol': {
           const items = Array.from(el.querySelectorAll('li'));
           for (const li of items) {
             children.push(
@@ -119,6 +119,7 @@ export async function exportToDocx(htmlContent: string, title: string = 'Documen
             );
           }
           break;
+        }
         case 'p':
         default:
           children.push(parseParagraphElement(el));

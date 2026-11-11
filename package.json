@@ -7,6 +7,8 @@
     "dev": "vite",
     "build": "tsc && vite build",
     "preview": "vite preview",
+    "lint": "eslint src",
+    "check": "npm run lint && tsc --noEmit && npm test",
     "test": "vitest run",
     "test:karate": "powershell -ExecutionPolicy Bypass -File ./tests/karate/run-karate.ps1",
     "test:karate:all": "mvn test -f tests/karate/pom.xml",
@@ -43,6 +45,7 @@
     "xlsx": "^0.18.5"
   },
   "devDependencies": {
+    "@eslint/js": "^9.20.0",
     "@tauri-apps/cli": "^2.12.4",
     "@testing-library/jest-dom": "^6.6.3",
     "@testing-library/react": "^16.2.0",
@@ -51,10 +54,13 @@
     "@types/react-dom": "^18.3.5",
     "@vitejs/plugin-react": "^4.3.4",
     "autoprefixer": "^10.4.20",
+    "eslint": "^9.20.0",
+    "eslint-plugin-react-hooks": "^7.1.1",
     "jsdom": "^26.0.0",
     "postcss": "^8.5.2",
     "tailwindcss": "^3.4.17",
     "typescript": "^5.7.3",
+    "typescript-eslint": "^8.72.2",
     "vite": "^6.1.0",
     "vitest": "^3.0.5"
   }

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import { Table } from '@tiptap/extension-table';
@@ -94,20 +94,7 @@ export const LocalWriter: React.FC<LocalWriterProps> = ({ initialFile, onSaveSta
     loadFile();
   }, [initialFile, editor, onSaveStatus]);
 
-  // Handle Ctrl+S keyboard shortcut
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if ((e.ctrlKey || e.metaKey) && e.key === 's') {
-        e.preventDefault();
-        handleSaveDocx();
-      }
-    };
-
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [editor, initialFile, docTitle]);
-
-  const handleSaveDocx = async () => {
+  const handleSaveDocx = useCallback(async () => {
     if (!editor) return;
     setIsExporting(true);
     try {
@@ -124,7 +111,20 @@ export const LocalWriter: React.FC<LocalWriterProps> = ({ initialFile, onSaveSta
     } finally {
       setIsExporting(false);
     }
-  };
+  }, [editor, docTitle, initialFile, onSaveStatus]);
+
+  // Handle Ctrl+S keyboard shortcut
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+        e.preventDefault();
+        handleSaveDocx();
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [handleSaveDocx]);
 
   const handleExportMarkdown = () => {
     if (!editor) return;

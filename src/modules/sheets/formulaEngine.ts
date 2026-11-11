@@ -139,7 +139,6 @@ export function evaluateCell(
 
     // Safely evaluate simple math expression containing only numbers and + - * / ( ) .
     if (/^[0-9+\-*/().\s]+$/.test(expr)) {
-      // eslint-disable-next-line no-eval
       const result = Function(`"use strict"; return (${expr});`)();
       if (!isFinite(result)) return '#DIV/0!';
       return typeof result === 'number' ? Math.round(result * 100000) / 100000 : result;
