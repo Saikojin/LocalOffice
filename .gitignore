@@ -10,6 +10,32 @@ build
 *.local
 out
 
+# Installers, Binaries & Application Packages
+*.exe
+*.msi
+*.msix
+*.msixbundle
+*.appx
+*.appxbundle
+*.dmg
+*.pkg
+*.app/
+*.deb
+*.AppImage
+*.appimage
+*.rpm
+*.snap
+*.flatpak
+*.apk
+*.aab
+*.ipa
+*.xcarchive
+installers/
+releases/
+packages/
+bundle/
+artifacts/
+
 # Rust / Tauri
 src-tauri/target
 src-tauri/gen
